@@ -9,7 +9,7 @@ dbcursor = dbconn.cursor()
 
 @app.route('/dbtest')
 def dbtest():
-    return dbcursor.execute('Select * from test')
+    return dbcursor.execute('Select * from test').fetchall()
 
 @app.route("/")
 def hello():
