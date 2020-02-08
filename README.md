@@ -1,1 +1,6 @@
 # shamehub
+
+## Premise
+
+## Technologies
+
