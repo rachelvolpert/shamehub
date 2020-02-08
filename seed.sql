@@ -10,6 +10,7 @@ INSERT INTO "public"."followers"("follower", "followee") VALUES(1, 2) RETURNING 
 INSERT INTO "public"."followers"("follower", "followee") VALUES(2, 1) RETURNING "follower", "followee";
 -- comments
 INSERT INTO "public"."comments"("commentor", "transaction_id", "comment_text") VALUES(1, 2, 'how shameful') RETURNING "commentor", "transaction_id", "comment_text";
+INSERT INTO "public"."comments"("commentor", "transaction_id", "comment_text") VALUES(1, 2, 'LOL') RETURNING "commentor", "transaction_id", "comment_text";
 -- reactions
 INSERT INTO "public"."reactions"("reactor", "transaction_id", "reaction") VALUES(2, 1, ':angry:') RETURNING "reactor", "transaction_id", "reaction";
 INSERT INTO "public"."reactions"("reactor", "transaction_id", "reaction") VALUES(2, 3, ':sad:') RETURNING "reactor", "transaction_id", "reaction";
