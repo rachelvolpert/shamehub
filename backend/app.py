@@ -1,8 +1,15 @@
 from flask import Flask, request
 import os
+import pg8000
 
 app = Flask(__name__)
 
+dbconn = pg8000.connection(database=os.environ.get('DATABASE_NAME'), user=os.environ.get('DATABASE_USER'), host=os.environ.get('DATABASE_HOST'), port=int(os.environ.get('DATABASE_PORT', 5432)), password=os.environ.get('DATABASE_PASSWORD', ''))
+dbcursor = dbconn.cursor()
+
+@app.route('/dbtest')
+def dbtest():
+    return dbcursor.execute('Select * from test')
 
 @app.route("/")
 def hello():
