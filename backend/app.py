@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify
 import os
 import pg8000
 
@@ -9,7 +9,7 @@ dbcursor = dbconn.cursor()
 
 @app.route('/dbtest')
 def dbtest():
-    return dbcursor.execute('Select * from test').fetchall()
+    return jsonify(dbcursor.execute('Select * from test').fetchall())
 
 @app.route("/")
 def hello():
