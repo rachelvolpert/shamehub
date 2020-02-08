@@ -9,7 +9,7 @@ def hello():
 
 
 @app.route("/login")
-def login(name):
+def login():
     pass
 
 
@@ -19,7 +19,7 @@ def get_transactions():
 
 
 @app.route("/user")
-def get_user(user):
+def get_user():
     user_id = request.args.get("user_id")
 
 
