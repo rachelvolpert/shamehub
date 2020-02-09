@@ -5,6 +5,7 @@
   "dependencies": {
     "@ionic/react": "^4.11.8",
     "@ionic/react-router": "^4.11.8",
+    "@ionic/cli": "^6.0.0",
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.4.0",
     "@testing-library/user-event": "^8.0.3",
@@ -25,10 +26,10 @@
     "typescript": "^3.7.4"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "start": "cd front-end && react-scripts start",
+    "build": "cd front-end && rm src/constants.js && mv src/constants_prod.js src/constants.js && echo 'running from package.json' && react-scripts build",
+    "test": "cd front-end && react-scripts test",
+    "eject": "cd front-end && react-scripts eject"
   },
   "eslintConfig": {
     "extends": "react-app"

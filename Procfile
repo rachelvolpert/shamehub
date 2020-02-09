@@ -1,1 +1,1 @@
-web: cd backend && pip install -r requirements.txt && gunicorn app:app
+web: mv front-end/build backend/web && cd backend && pip install -r requirements.txt && gunicorn app:app

@@ -8,7 +8,7 @@ import datetime
 import json
 
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='web', static_url_path='')
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 
@@ -24,7 +24,22 @@ def dbtest():
 
 @app.route("/")
 def hello():
-    return "Hello World!"
+    return app.send_static_file('index.html')
+
+
+@app.route("/profile")
+def profile():
+    return app.send_static_file('index.html')
+
+
+@app.route("/feed")
+def feed():
+    return app.send_static_file('index.html')
+
+
+@app.route("/insights")
+def insights():
+    return app.send_static_file('index.html')
 
 
 @app.route('/login', methods=['POST'])
@@ -247,5 +262,5 @@ def pretty_print_response(response):
 
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
+    port = int(os.environ.get('PORT', 8000))
     app.run(host='0.0.0.0', port=port)
