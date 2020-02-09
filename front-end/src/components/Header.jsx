@@ -5,8 +5,8 @@ import React from "react";
 const Header = () => (
   <IonHeader>
     <IonToolbar>
-      <IonTitle size="large" style={{ textAlign: "center" }}>
-        shamehub
+      <IonTitle color="primary" style={{ textAlign: "center", fontSize: "32px"}}>
+        <p>shamehub</p>
       </IonTitle>
     </IonToolbar>
   </IonHeader>

@@ -14,10 +14,12 @@ import {
   IonTitle,
   IonToolbar,
   IonList,
-  IonButton
+  IonButton,
+  IonModal,
+  IonSearchbar
 } from "@ionic/react";
 import { book, build, colorFill, grid } from "ionicons/icons";
-import React, { Component } from "react";
+import React, { Component, useState} from "react";
 import PlaidLink from "react-plaid-link";
 
 import "./Profile.css";
@@ -30,6 +32,12 @@ import axios from "axios";
 // };
 
 class Profile extends Component {
+  state = {
+    showModal: false,
+    users: [],
+    usersToShow: []
+  
+  }
   onSuccess = (token, metadata) => {
     axios
       .post(`${API_BASE}/get_access_token`, {
@@ -40,27 +48,44 @@ class Profile extends Component {
       });
   };
 
+  onFollow = (uid) => {
+    axios 
+      .post(`${API_BASE}/follows`, {
+        fid: uid
+      })
+      .then(resp => {
+        console.log("follow added", resp);
+      });
+      
+  }
+
+  componentDidMount() {
+    axios
+      .get(`${API_BASE}/users`)
+      .then(resp => {
+        this.setState({
+          users: resp.data,
+          usersToShow: resp.data
+        });
+      })
+      .catch(e => {
+        console.error(e);
+      });
+  }
+  
+  handleInput = (event) => {
+    console.log('handleInput called')
+    const query = event.target.value.toLowerCase();
+    const usersToShow = this.state.users.filter(user => { return user.name.toLowerCase().includes(query)})
+    this.setState ({usersToShow})
+  }
+
   render() {
     return (
       <IonPage>
         <Header />
         <IonContent>
-          <IonCard className="welcome-card">
-            <img src="/assets/shapes.svg" alt="" />
-            <IonCardHeader>
-              {/* <IonCardSubtitle>Get Started</IonCardSubtitle> */}
-              <IonCardTitle>Connected Accounts</IonCardTitle>
-            </IonCardHeader>
-            <IonCardContent>
-              <IonList></IonList>
-              {/* <p>
-                Now that your app has been created, you'll want to start building
-                out features and components. Check out some of the resources below
-                for next steps.
-              </p> */}
-            </IonCardContent>
-          </IonCard>
-
+      
           {/* <IonList lines="none">
             <IonListHeader>
               <IonLabel>Resources</IonLabel>
@@ -92,7 +117,44 @@ class Profile extends Component {
             </IonItem>
           </IonList> */}
 
+            <IonCard className="welcome-card">
+            <img src="https://i.imgur.com/Pq6GIEY.png" alt="" />
+            <IonCardHeader>  
+              <IonCardTitle color="tertiary">Welcome to Shamehub</IonCardTitle>
+              <ion-card-content color="tertiary">
+              Cut down on bad habits by broadcasting them to be shamed by all of your friends!
+              Connect your credit and debit cards and let the shaming begin....
+            </ion-card-content>
+            </IonCardHeader>
+          </IonCard>
+
+          <IonButton id="addfriend" expand="block" color="secondary" onClick={() => this.setState({showModal: true})}>Add a Friend</IonButton>
+            <IonModal isOpen={this.state.showModal}>
+            <IonHeader translucent>
+              <IonToolbar>
+                <IonTitle>Searchbar</IonTitle>
+              </IonToolbar>
+              <IonToolbar>
+                <IonSearchbar onInput={this.handleInput}></IonSearchbar>
+              </IonToolbar>
+            </IonHeader>
+                
+                <IonContent fullscreen>
+                <IonList>
+                {this.state.usersToShow.map((user,idx) => {
+                      return (
+                        <IonItem onClick={()=>this.onFollow(user.id)} key={idx}>
+                            {user.name}
+                        </IonItem>
+                        );
+                      })}
+                  </IonList>
+                  </IonContent>
+              <IonButton onClick={() => this.setState({showModal: false})}>Done Adding Friends</IonButton>
+            </IonModal>
+
           <PlaidLink
+            id="plaidlink"
             clientName="Your app name"
             env="development"
             // env="sandbox"
@@ -102,10 +164,22 @@ class Profile extends Component {
             onExit={() => {
               console.log("exited plaid");
             }}
-            onSuccess={this.onSuccess}
-          >
-            <IonButton id="link-button">Connect an Account (Plaid)</IonButton>
+            onSuccess={this.onSuccess} 
+          > 
+            <IonButton expand="block" color="secondary">Connect Bank Account with Plaid</IonButton>
           </PlaidLink>
+
+          <IonCard className="welcome-card">
+            <IonCardHeader>
+              {/* <IonCardSubtitle>Get Started</IonCardSubtitle> */}
+              <IonCardSubtitle>Connected Accounts</IonCardSubtitle>
+            </IonCardHeader>
+            <IonCardContent>
+              <IonList></IonList>
+            </IonCardContent>
+          </IonCard>
+      
+          {/* <IonModalController></IonModalController> */}
         </IonContent>
       </IonPage>
     );
