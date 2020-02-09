@@ -37,7 +37,7 @@ export default class Transaction extends Component {
     comments: [],
     reactions: {
       ":sad:": 0,
-      ":andgry:": 0,
+      ":angry:": 0,
       ":woozy:": 0
     }
   };
