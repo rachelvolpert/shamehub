@@ -40,11 +40,22 @@ export default class Auth extends Component {
       });
   };
   signup = () => {
-    axios.post(`${API_BASE}/signup`, {
-      email: this.state.email,
-      password: this.state.password,
-      name: this.state.name
-    });
+    axios
+      .post(
+        `${API_BASE}/signup`,
+        {
+          email: this.state.email,
+          password: this.state.password,
+          name: this.state.name
+        },
+        { withCredentials: true }
+      )
+      .then(resp => {
+        if (resp.status === 200) {
+          alert("User created!");
+          window.location = "/profile";
+        }
+      });
   };
 
   onEmailInput = e => {

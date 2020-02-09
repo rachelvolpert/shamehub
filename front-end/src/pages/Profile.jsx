@@ -69,7 +69,7 @@ class Profile extends Component {
 
   componentDidMount() {
     axios
-      .get(`${API_BASE}/users`)
+      .get(`${API_BASE}/users`, { withCredentials: true })
       .then(resp => {
         this.setState({
           users: resp.data,

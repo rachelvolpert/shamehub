@@ -42,6 +42,11 @@ def insights():
     return app.send_static_file('index.html')
 
 
+@app.route("/auth")
+def auth():
+    return app.send_static_file('index.html')
+
+
 @app.route('/login', methods=['POST'])
 def login():
     email = request.json['email']
@@ -115,8 +120,13 @@ def get_insights():
 
 @app.route("/users")
 def get_user():
-    users = dbcursor.execute(
-        "SELECT DISTINCT user_id, name FROM users").fetchall()
+    uid = request.cookies.get('x-uid')
+    if uid:
+        users = dbcursor.execute(
+            "SELECT DISTINCT user_id, name FROM users WHERE user_id != {0}".format(uid)).fetchall()
+    else:
+        users = dbcursor.execute(
+            "SELECT DISTINCT user_id, name FROM users").fetchall()
     user_list = []
     for row in users:
         my_dict = {"id": row[0], "name": row[1]}
