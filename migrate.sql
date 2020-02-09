@@ -1,11 +1,11 @@
 CREATE TABLE users (
-	user_id serial PRIMARY KEY,
+	user_id serial UNIQUE PRIMARY KEY,
 	email varchar(255) UNIQUE NOT NULL,
 	name varchar(50) NOT NULL,
 	password text NOT NULL
 );
 CREATE TABLE transactions (
-	t_id serial PRIMARY KEY,
+	t_id serial UNIQUE PRIMARY KEY,
 	user_id integer NOT NULL,
 	date timestamp,
 	description varchar(355),
