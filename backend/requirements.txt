@@ -1,3 +1,16 @@
 Flask==1.1.1
 gunicorn==20.0.4
 pg8000==1.13.2
+certifi==2019.11.28
+chardet==3.0.4
+Click==7.0
+idna==2.8
+itsdangerous==1.1.0
+Jinja2==2.11.1
+MarkupSafe==1.1.1
+plaid-python==3.5.0
+requests==2.22.0
+urllib3==1.25.8
+Werkzeug==1.0.0
+Flask-Cors==3.0.8
+six==1.14.0
