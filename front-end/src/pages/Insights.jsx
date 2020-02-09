@@ -12,6 +12,8 @@ import {
   IonCardContent
 } from "@ionic/react";
 import Header from "../components/Header";
+import axios from "axios";
+import { API_BASE } from "../constants";
 
 const InsightsPage = () => {
   return (
@@ -26,23 +28,39 @@ const InsightsPage = () => {
   );
 };
 
+
 class Insights extends Component {
 
+  state = {
+    total: 0
+  }
+
+  getTotalSpent() {
+    axios
+      .get(`${API_BASE}/total_spent`)
+      .then(resp => {
+        this.setState({
+          total: resp.data.total
+        });
+      })
+      .catch(e => {
+        console.error(e);
+      });
+  }
 
   render() {
     return (
       <IonPage>
         <Header />
         <IonContent>
-          <IonCard className="welcome-card">
-            <img src="/assets/shapes.svg" alt="" />
+        <IonCard className="insights-card">
+            <img src="https://i.imgur.com/EWtXf5k.jpg" alt="" />
             <IonCardHeader>
-              {/* <IonCardSubtitle>Get Started</IonCardSubtitle> */}
-              <IonCardTitle>Shameful Insights</IonCardTitle>
+             <ion-card-subtitle>In the past 30 days...</ion-card-subtitle>
+              <IonCardTitle color="tertiary">You spent {this.state.total} shame dollars</IonCardTitle>
+              <ion-card-content color="tertiary">
+              </ion-card-content>
             </IonCardHeader>
-            <IonCardContent>
-              <IonList></IonList>
-            </IonCardContent>
           </IonCard>
 
         </IonContent>
