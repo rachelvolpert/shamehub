@@ -12,6 +12,8 @@ import {
   IonCardContent
 } from "@ionic/react";
 import Header from "../components/Header";
+import axios from "axios";
+import { API_BASE } from "../constants";
 
 const InsightsPage = () => {
   return (
@@ -27,24 +29,48 @@ const InsightsPage = () => {
 };
 
 class Insights extends Component {
+  state = {
+    total: 0
+  };
 
+  componentDidMount() {
+    axios
+      .get(`${API_BASE}/total_spent`, { withCredentials: true })
+      .then(resp => {
+        this.setState({
+          total: resp.data.total
+        });
+      })
+      .catch(e => {
+        console.error(e);
+      });
+  }
 
   render() {
     return (
       <IonPage>
         <Header />
         <IonContent>
-          <IonCard className="welcome-card">
-            <img src="/assets/shapes.svg" alt="" />
+          <IonCard className="insights-card">
+            <img src="https://i.imgur.com/EWtXf5k.jpg" alt="" />
             <IonCardHeader>
-              {/* <IonCardSubtitle>Get Started</IonCardSubtitle> */}
-              <IonCardTitle>Shameful Insights</IonCardTitle>
+              <ion-card-subtitle>In the past 30 days...</ion-card-subtitle>
+              <IonCardTitle color="tertiary">
+                You spent {this.state.total} shame dollars
+              </IonCardTitle>
+              <ion-card-content color="tertiary"></ion-card-content>
             </IonCardHeader>
-            <IonCardContent>
-              <IonList></IonList>
-            </IonCardContent>
           </IonCard>
-
+          <IonCard className="insights-card">
+            <img src="https://i.imgur.com/Ole8dn3.jpg" alt="" />
+            <IonCardHeader>
+              <IonCardTitle color="tertiary">
+                You could have planted {Math.floor(this.state.total / 2.5)}{" "}
+                trees instead!
+              </IonCardTitle>
+              <ion-card-content color="tertiary"></ion-card-content>
+            </IonCardHeader>
+          </IonCard>
         </IonContent>
       </IonPage>
     );
