@@ -7,6 +7,13 @@ import plaid
 import datetime
 import json
 
+import sentry_sdk
+from sentry_sdk.integrations.flask import FlaskIntegration
+
+sentry_sdk.init(
+    dsn="https://d216d7ca6b11477bab15aef914c89602@sentry.io/2383148",
+    integrations=[FlaskIntegration()]
+)
 
 app = Flask(__name__, static_folder='web', static_url_path='')
 cors = CORS(app, supports_credentials=True)
