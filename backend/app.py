@@ -118,7 +118,7 @@ def total_spent():
     print(total)
     if total == None:
         total = 0
-    return json.dumps({"total": total})
+    return json.dumps({"total": float(total)})
 
 
 @app.route("/categories_spent")
