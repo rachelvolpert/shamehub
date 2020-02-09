@@ -109,6 +109,7 @@ export default class Auth extends Component {
                 required
                 type="text"
                 onInput={this.onPasswordInput}
+                type="password"
               ></IonInput>
             </IonItem>
           </IonList>
