@@ -52,7 +52,7 @@ class Feed extends Component {
 
   componentDidMount() {
     axios
-      .get(`${API_BASE}/transactions`)
+      .get(`${API_BASE}/transactions`, { withCredentials: true })
       .then(resp => {
         this.setState({
           transactions: resp.data

@@ -22,13 +22,19 @@ export default class Auth extends Component {
     name: ""
   };
   login = () => {
+    console.log(`Posting to ${API_BASE}/login`);
     axios
-      .post(`${API_BASE}/login`, {
-        email: this.state.email,
-        password: this.state.password
-      })
+      .post(
+        `${API_BASE}/login`,
+        {
+          email: this.state.email,
+          password: this.state.password
+        },
+        { withCredentials: true }
+      )
       .then(resp => {
         if (resp.status === 200) {
+          console.log(resp);
           window.location = "/profile";
         }
       });

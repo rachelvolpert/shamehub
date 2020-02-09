@@ -9,7 +9,7 @@ import json
 
 
 app = Flask(__name__, static_folder='web', static_url_path='')
-cors = CORS(app)
+cors = CORS(app, supports_credentials=True)
 app.config['CORS_HEADERS'] = 'Content-Type'
 
 dbconn = pg8000.connect(database=os.environ.get('DATABASE_NAME'), user=os.environ.get('DATABASE_USER'), host=os.environ.get(
@@ -43,13 +43,12 @@ def insights():
 
 
 @app.route('/login', methods=['POST'])
-@cross_origin()
 def login():
     email = request.json['email']
     id, password = dbcursor.execute(
         "SELECT user_id, password FROM users WHERE email = '{0}'".format(email)).fetchone()
     if request.json['password'] == password:
-        resp = make_response('Login Successful')
+        resp = make_response('Login successful!')
         resp.set_cookie('x-uid', str(id))
         return resp
     else:
@@ -57,7 +56,6 @@ def login():
 
 
 @app.route('/signup', methods=['POST'])
-@cross_origin()
 def sign_up():
     email = request.json['email']
     result = dbcursor.execute(
@@ -76,7 +74,6 @@ def sign_up():
 
 
 @app.route('/comments', methods=['POST'])
-@cross_origin()
 def add_comment():
     commentor = request.cookies.get('x-uid')
     if not commentor:
@@ -190,11 +187,13 @@ def actually_get_transactions_for(uid, query):
 
 
 @app.route("/transactions", methods=['GET'])
-@cross_origin()
 def get_transactions():
     uid = request.cookies.get('x-uid')
+    if uid:
+        print("Requested while logged in!")
     if not uid:
         uid = 1
+        print("Requested while not logged in :(")
     return actually_get_transactions_for(uid, TRANSACTIONS_LOOKUP_SQL_FEED)
 
 
@@ -226,7 +225,6 @@ public_token = None
 
 
 @app.route("/get_access_token", methods=['POST'])
-@cross_origin()
 def get_access_token():
     global access_token
     public_token = request.json['public_token']
