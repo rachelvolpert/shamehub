@@ -32,6 +32,9 @@ const reactionToEmoji = {
 };
 
 export default class Transaction extends Component {
+  state = {
+    comment: ""
+  };
   sendReaction(reactionName, transactionId) {
     axios.post(`${API_BASE}/reactions`, {
       reaction: reactionName,
@@ -55,6 +58,22 @@ export default class Transaction extends Component {
       );
     });
   }
+
+  onInputComment = e => {
+    const comment = e.target.value;
+    this.setState({ comment });
+  };
+
+  onKeyDown = (e, transactionId) => {
+    // Enter = submit comment
+    if (e.keyCode === 13 && !!this.state.comment) {
+      // time 2 submit comment
+      axios.post(`${API_BASE}/comments`, {
+        comment: this.state.comment,
+        transaction_id: transactionId
+      });
+    }
+  };
 
   render() {
     const { transaction } = this.props;
@@ -85,6 +104,8 @@ export default class Transaction extends Component {
             <IonInput
               style={{ border: "solid 1px var(--ion-color-medium)" }}
               placeholder="Add a new comment..."
+              onInput={this.onInputComment}
+              onKeyDown={e => this.onKeyDown(e, transaction.t_id)}
             ></IonInput>
             {/* <IonButton color="primary">Primary</IonButton> */}
           </div>

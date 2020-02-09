@@ -78,8 +78,8 @@ def add_comment():
     commentor = request.cookies.get('x-uid')
     if not commentor:
         abort(401)
-    comment = request.form['comment']
-    transaction = request.form['transaction_id']
+    comment = request.json['comment']
+    transaction = request.json['transaction_id']
     dbcursor.execute("INSERT INTO public.comments(commentor, transaction_id, comment_text) VALUES('{0}', '{1}', '{2}') RETURNING comment_text".format(
         commentor, transaction, comment)).fetchone()
     dbconn.commit()
@@ -115,7 +115,7 @@ def get_user():
         "SELECT DISTINCT user_id, name FROM users").fetchall()
     user_list = []
     for row in users:
-        my_dict = {"id":row[0], "name":row[1]}
+        my_dict = {"id": row[0], "name": row[1]}
         user_list.append(my_dict)
     return jsonify(user_list)
 
@@ -236,14 +236,19 @@ def get_access_token():
     access_token = exchange_response['access_token']
     public_token = public_token
 
-    return get_plaid_transactions()
+    uid = request.cookies.get('x-uid')
+
+    plaid_transactions = get_plaid_transactions(uid)
+
+    return plaid_transactions
+
+    # return make_response("It has worked")
 
     # return jsonify(exchange_response)
 
 
-@cross_origin()
-def get_plaid_transactions():
-
+# @cross_origin()
+def get_plaid_transactions(uid):
     # Pull transactions for the last 30 days
     start_date = '{:%Y-%m-%d}'.format(datetime.datetime.now() +
                                       datetime.timedelta(-30))
@@ -253,8 +258,19 @@ def get_plaid_transactions():
             access_token, start_date, end_date)
     except plaid.errors.PlaidError as e:
         return jsonify(e)
-    pretty_print_response(transactions_response)
-    return jsonify({'error': None, 'transactions': transactions_response})
+
+    # pretty_print_response(transactions_response)
+
+    return jsonify({'error': None, 'transactions': transactions_response['transactions']})
+
+
+def store_shameful_plaid_transactions(transactions_response):
+    for transaction in transactions_response:
+        STORE_PLAID_TRANSACTIONS_SQL = 'INSERT into transactions("user_id", "date", "description", "category", "amount") VALUES({}, {}, {}, {}, {})'.format(
+            uid, transaction['date'], transaction['name'], transaction['category'][0], transaction['amount'])
+
+        dbcursor.execute(STORE_PLAID_TRANSACTIONS_SQL)
+        dbconn.commit()
 
 
 def pretty_print_response(response):

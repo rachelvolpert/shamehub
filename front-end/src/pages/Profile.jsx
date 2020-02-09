@@ -19,7 +19,7 @@ import {
   IonSearchbar
 } from "@ionic/react";
 import { book, build, colorFill, grid } from "ionicons/icons";
-import React, { Component, useState} from "react";
+import React, { Component, useState } from "react";
 import PlaidLink from "react-plaid-link";
 
 import "./Profile.css";
@@ -34,10 +34,11 @@ import axios from "axios";
 class Profile extends Component {
   state = {
     showModal: false,
+    showTransactionsModal: false,
+    plaidTransactions: [],
     users: [],
     usersToShow: []
-  
-  }
+  };
   onSuccess = (token, metadata) => {
     axios
       .post(`${API_BASE}/get_access_token`, {
@@ -45,19 +46,22 @@ class Profile extends Component {
       })
       .then(resp => {
         console.log("holy shit is this a response", resp);
+        this.setState({
+          plaidTransactions: resp.data.transactions,
+          showTransactionsModal: true
+        });
       });
   };
 
-  onFollow = (uid) => {
-    axios 
+  onFollow = uid => {
+    axios
       .post(`${API_BASE}/follows`, {
         fid: uid
       })
       .then(resp => {
         console.log("follow added", resp);
       });
-      
-  }
+  };
 
   componentDidMount() {
     axios
@@ -72,64 +76,42 @@ class Profile extends Component {
         console.error(e);
       });
   }
-  
-  handleInput = (event) => {
-    console.log('handleInput called')
+
+  handleInput = event => {
+    console.log("handleInput called");
     const query = event.target.value.toLowerCase();
-    const usersToShow = this.state.users.filter(user => { return user.name.toLowerCase().includes(query)})
-    this.setState ({usersToShow})
-  }
+    const usersToShow = this.state.users.filter(user => {
+      return user.name.toLowerCase().includes(query);
+    });
+    this.setState({ usersToShow });
+  };
 
   render() {
     return (
       <IonPage>
         <Header />
         <IonContent>
-      
-          {/* <IonList lines="none">
-            <IonListHeader>
-              <IonLabel>Resources</IonLabel>
-            </IonListHeader>
-            <IonItem href="https://ionicframework.com/docs/" target="_blank">
-              <IonIcon slot="start" color="medium" icon={book} />
-              <IonLabel>Ionic Documentation</IonLabel>
-            </IonItem>
-            <IonItem
-              href="https://ionicframework.com/docs/building/scaffolding"
-              target="_blank"
-            >
-              <IonIcon slot="start" color="medium" icon={build} />
-              <IonLabel>Scaffold Out Your App</IonLabel>
-            </IonItem>
-            <IonItem
-              href="https://ionicframework.com/docs/layout/structure"
-              target="_blank"
-            >
-              <IonIcon slot="start" color="medium" icon={grid} />
-              <IonLabel>Change Your App Layout</IonLabel>
-            </IonItem>
-            <IonItem
-              href="https://ionicframework.com/docs/theming/basics"
-              target="_blank"
-            >
-              <IonIcon slot="start" color="medium" icon={colorFill} />
-              <IonLabel>Theme Your App</IonLabel>
-            </IonItem>
-          </IonList> */}
-
-            <IonCard className="welcome-card">
+          <IonCard className="welcome-card">
             <img src="https://i.imgur.com/Pq6GIEY.png" alt="" />
-            <IonCardHeader>  
+            <IonCardHeader>
               <IonCardTitle color="tertiary">Welcome to Shamehub</IonCardTitle>
               <ion-card-content color="tertiary">
-              Cut down on bad habits by broadcasting them to be shamed by all of your friends!
-              Connect your credit and debit cards and let the shaming begin....
-            </ion-card-content>
+                Cut down on bad habits by broadcasting them to be shamed by all
+                of your friends! Connect your credit and debit cards and let the
+                shaming begin....
+              </ion-card-content>
             </IonCardHeader>
           </IonCard>
 
-          <IonButton id="addfriend" expand="block" color="secondary" onClick={() => this.setState({showModal: true})}>Add a Friend</IonButton>
-            <IonModal isOpen={this.state.showModal}>
+          <IonButton
+            id="addfriend"
+            expand="block"
+            color="secondary"
+            onClick={() => this.setState({ showModal: true })}
+          >
+            Add a Friend
+          </IonButton>
+          <IonModal isOpen={this.state.showModal}>
             <IonHeader translucent>
               <IonToolbar>
                 <IonTitle>Searchbar</IonTitle>
@@ -138,20 +120,22 @@ class Profile extends Component {
                 <IonSearchbar onInput={this.handleInput}></IonSearchbar>
               </IonToolbar>
             </IonHeader>
-                
-                <IonContent fullscreen>
-                <IonList>
-                {this.state.usersToShow.map((user,idx) => {
-                      return (
-                        <IonItem onClick={()=>this.onFollow(user.id)} key={idx}>
-                            {user.name}
-                        </IonItem>
-                        );
-                      })}
-                  </IonList>
-                  </IonContent>
-              <IonButton onClick={() => this.setState({showModal: false})}>Done Adding Friends</IonButton>
-            </IonModal>
+
+            <IonContent fullscreen>
+              <IonList>
+                {this.state.usersToShow.map((user, idx) => {
+                  return (
+                    <IonItem onClick={() => this.onFollow(user.id)} key={idx}>
+                      {user.name}
+                    </IonItem>
+                  );
+                })}
+              </IonList>
+            </IonContent>
+            <IonButton onClick={() => this.setState({ showModal: false })}>
+              Done Adding Friends
+            </IonButton>
+          </IonModal>
 
           <PlaidLink
             id="plaidlink"
@@ -164,22 +148,42 @@ class Profile extends Component {
             onExit={() => {
               console.log("exited plaid");
             }}
-            onSuccess={this.onSuccess} 
-          > 
-            <IonButton expand="block" color="secondary">Connect Bank Account with Plaid</IonButton>
+            onSuccess={this.onSuccess}
+          >
+            <IonButton expand="block" color="secondary">
+              Connect Bank Account with Plaid
+            </IonButton>
           </PlaidLink>
+
+          <IonModal isOpen={this.state.showTransactionsModal}>
+            <IonHeader translucent>
+              <IonTitle>Recent Transactions</IonTitle>
+            </IonHeader>
+
+            <IonContent fullscreen>
+              <IonList>
+                {this.state.usersToShow.map((user, idx) => {
+                  return (
+                    <IonItem onClick={() => this.onFollow(user.id)} key={idx}>
+                      {user.name}
+                    </IonItem>
+                  );
+                })}
+              </IonList>
+            </IonContent>
+            <IonButton onClick={() => this.setState({ showModal: false })}>
+              Done Adding Friends
+            </IonButton>
+          </IonModal>
 
           <IonCard className="welcome-card">
             <IonCardHeader>
-              {/* <IonCardSubtitle>Get Started</IonCardSubtitle> */}
               <IonCardSubtitle>Connected Accounts</IonCardSubtitle>
             </IonCardHeader>
             <IonCardContent>
               <IonList></IonList>
             </IonCardContent>
           </IonCard>
-      
-          {/* <IonModalController></IonModalController> */}
         </IonContent>
       </IonPage>
     );
