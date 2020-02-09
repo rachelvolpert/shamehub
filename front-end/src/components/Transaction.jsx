@@ -1,16 +1,7 @@
 import React, { Component } from "react";
 import {
-  IonContent,
-  IonHeader,
-  IonItem,
   IonLabel,
-  IonList,
-  IonPage,
-  IonTitle,
-  IonToolbar,
-  IonTextarea,
-  IonItemGroup,
-  IonCol,
+  IonText,
   IonCard,
   IonCardHeader,
   IonCardSubtitle,
@@ -142,25 +133,31 @@ export default class Transaction extends Component {
       <IonCard>
         <IonCardHeader>
           <IonCardSubtitle>{transaction.name}</IonCardSubtitle>
-          <IonCardTitle>{`${transaction.category} - $${transaction.price}`}</IonCardTitle>
+          <IonCardTitle>{`${transaction.category} - ${
+            transaction.description
+          } - $${transaction.price.toFixed(2)}`}</IonCardTitle>
+          <IonCardSubtitle>
+            {new Date(transaction.timestamp).toDateString()}
+          </IonCardSubtitle>
         </IonCardHeader>
-        {/* <IonLabel>
-                <h3>{transaction.name}</h3>
-                <h2>{`${transaction.category} - ${transaction.price}`}</h2>
-              </IonLabel> */}
-        <hr style={{ background: "var(--ion-color-light)" }} />
+
+        {/* <hr style={{ background: "var(--ion-color-light)" }} /> */}
 
         <IonCardContent>
           {this.renderReactions(this.state.reactions, transaction.t_id)}
 
-          {this.state.comments.map((comment, idx) => {
-            return (
-              <IonLabel key={idx}>
-                <h3>{comment.commentor_name}</h3>
-                <h2>{comment.comment_text}</h2>
-              </IonLabel>
-            );
-          })}
+          <div style={{ paddingTop: "5px", paddingBottom: "5px" }}>
+            {this.state.comments.map((comment, idx) => {
+              return (
+                <IonLabel key={idx}>
+                  <h3 style={{ color: "var(--ion-color-dark)" }}>
+                    {comment.commentor_name}
+                  </h3>
+                  <h2>{comment.comment_text}</h2>
+                </IonLabel>
+              );
+            })}
+          </div>
           <div style={{ display: "flex" }}>
             <IonInput
               value={this.state.comment}

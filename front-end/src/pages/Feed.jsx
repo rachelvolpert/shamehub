@@ -55,7 +55,9 @@ class Feed extends Component {
       .get(`${API_BASE}/transactions`, { withCredentials: true })
       .then(resp => {
         this.setState({
-          transactions: resp.data
+          transactions: resp.data.sort(
+            (t1, t2) => new Date(t2.timestamp) - new Date(t1.timestamp)
+          )
         });
       })
       .catch(e => {

@@ -118,7 +118,7 @@ def total_spent():
     print(total)
     if total == None:
         total = 0
-    return {"total": total}
+    return {"total": str(total)}
 
 
 @app.route("/categories_spent")
@@ -202,7 +202,7 @@ def actually_get_transactions_for(uid, query):
         t_id, user_id, transactor_name, timestamp, description, category, amount, reactor, reactor_name, reaction, commentor, commentor_name, comment_text = row
         if t_id not in big_dict_energy:
             big_dict_energy[t_id] = {"name": transactor_name, "price": float(
-                amount), "timestamp": timestamp, "category": category, "comments": [], "reactions": []}
+                amount), "timestamp": timestamp, "category": category, "description": description, "comments": [], "reactions": []}
         if comment_text:
             big_dict_energy[t_id]["comments"].append(
                 {"commentor_name": commentor_name, "comment_text": comment_text})
@@ -235,13 +235,15 @@ def search():
 
 PLAID_CLIENT_ID = "5e3e3e605947080013c2a414"
 # sandbox:
-# PLAID_SECRET = "4646889beb65f71925ee3d12a218fa"
+PLAID_SECRET = "4646889beb65f71925ee3d12a218fa"
 # development:
-PLAID_SECRET = "cb8bb08b9b63581ad75c24e832646d"
+# PLAID_SECRET = "df9699ea7bbe1b6f3789c51fe83ec9"
 PLAID_PUBLIC_KEY = "b1ede095e08a4bf8d26515ed4fe3b2"
 PLAID_PRODUCTS = "transactions"
 PLAID_COUNTRY_CODES = "US, CA, GB, FR, ES"
-PLAID_ENV = "development"
+# PLAID_ENV = "development"
+PLAID_ENV = "sandbox"
+
 
 client = plaid.Client(client_id=PLAID_CLIENT_ID, secret=PLAID_SECRET,
                       public_key=PLAID_PUBLIC_KEY, environment=PLAID_ENV, api_version='2019-05-29')
@@ -253,28 +255,36 @@ public_token = None
 @app.route("/get_access_token", methods=['POST'])
 def get_access_token():
     global access_token
-    public_token = request.json['public_token']
-    print("public token", public_token)
-    exchange_response = client.Item.public_token.exchange(public_token)
-    print('access token: ' + exchange_response['access_token'])
-    print('item ID: ' + exchange_response['item_id'])
-
-    access_token = exchange_response['access_token']
-    public_token = public_token
-
     uid = request.cookies.get('x-uid')
 
-    plaid_transactions = get_plaid_transactions(uid)
+    public_token = request.json['public_token']
+    bank_name = request.json['bank_name']
+    # print("public token", public_token)
+    exchange_response = client.Item.public_token.exchange(public_token)
+    # print('access token: ' + exchange_response['access_token'])
+    # print('item ID: ' + exchange_response['item_id'])
+
+    access_token = exchange_response['access_token']
+    item_id = exchange_response['item_id']
+
+    # account_id is actually item_id lol
+    INSERT_ACCESS_TOKEN_SQL = "INSERT into public.plaid_access_tokens(user_id, token, account_id, bank_name) VALUES('{}', '{}', '{}', '{}')".format(
+        uid, access_token, item_id, bank_name)
+
+    dbcursor.execute(INSERT_ACCESS_TOKEN_SQL)
+    dbconn.commit()
+
+    # print("access_token", access_token)
+
+    plaid_transactions = get_plaid_transactions()
 
     return plaid_transactions
-
-    # return make_response("It has worked")
 
     # return jsonify(exchange_response)
 
 
 # @cross_origin()
-def get_plaid_transactions(uid):
+def get_plaid_transactions():
     # Pull transactions for the last 30 days
     start_date = '{:%Y-%m-%d}'.format(datetime.datetime.now() +
                                       datetime.timedelta(-30))
@@ -290,13 +300,32 @@ def get_plaid_transactions(uid):
     return jsonify({'error': None, 'transactions': transactions_response['transactions']})
 
 
-def store_shameful_plaid_transactions(transactions_response):
-    for transaction in transactions_response:
-        STORE_PLAID_TRANSACTIONS_SQL = 'INSERT into transactions("user_id", "date", "description", "category", "amount") VALUES({}, {}, {}, {}, {})'.format(
+@app.route("/store_plaid_transactions", methods=['POST'])
+def store_shameful_plaid_transactions():
+    uid = request.cookies.get('x-uid')
+
+    transactions = request.json["transactions"]
+    for transaction in transactions:
+        STORE_PLAID_TRANSACTIONS_SQL = "INSERT into public.transactions(user_id, date, description, category, amount) VALUES('{}', '{}', '{}', '{}', '{}')".format(
             uid, transaction['date'], transaction['name'], transaction['category'][0], transaction['amount'])
 
         dbcursor.execute(STORE_PLAID_TRANSACTIONS_SQL)
         dbconn.commit()
+
+    return make_response("Added transactions")
+
+
+@app.route("/get_connected_accounts", methods=['GET'])
+def get_connected_accounts():
+    uid = request.cookies.get('x-uid')
+
+    accounts = dbcursor.execute(
+        "SELECT DISTINCT bank_name FROM plaid_access_tokens WHERE user_id = {0}".format(uid)).fetchall()
+
+    account_list = []
+    for row in accounts:
+        account_list.append(row[0])
+    return jsonify(account_list)
 
 
 def pretty_print_response(response):

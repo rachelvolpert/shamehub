@@ -16,14 +16,15 @@ import {
   IonList,
   IonButton,
   IonModal,
-  IonSearchbar
+  IonSearchbar,
+  IonCheckbox
 } from "@ionic/react";
-import { book, build, colorFill, grid } from "ionicons/icons";
-import React, { Component, useState } from "react";
+import React, { Component } from "react";
 import PlaidLink from "react-plaid-link";
 
 import "./Profile.css";
 import Header from "../components/Header";
+import ConnectedAccounts from "../components/ConnectedAccounts";
 import { API_BASE } from "../constants";
 import axios from "axios";
 
@@ -36,14 +37,20 @@ class Profile extends Component {
     showModal: false,
     showTransactionsModal: false,
     plaidTransactions: [],
+    checkedPlaidTransactions: [],
     users: [],
     usersToShow: []
   };
   onSuccess = (token, metadata) => {
     axios
-      .post(`${API_BASE}/get_access_token`, {
-        public_token: token
-      })
+      .post(
+        `${API_BASE}/get_access_token`,
+        {
+          public_token: token,
+          bank_name: metadata.institution.name
+        },
+        { withCredentials: true }
+      )
       .then(resp => {
         console.log("holy shit is this a response", resp);
         this.setState({
@@ -64,6 +71,30 @@ class Profile extends Component {
       )
       .then(resp => {
         console.log("follow added", resp);
+      });
+  };
+
+  processShamefulTransactions = () => {
+    this.setState({ showTransactionsModal: false });
+
+    const shamefulTransactions = this.state.plaidTransactions.filter(t =>
+      this.state.checkedPlaidTransactions.includes(t.name)
+    );
+    console.log("plaid transactions", this.state.plaidTransactions);
+    console.log("checked plaid", this.state.checkedPlaidTransactions);
+
+    console.log("shameful", shamefulTransactions);
+
+    axios
+      .post(
+        `${API_BASE}/store_plaid_transactions`,
+        {
+          transactions: shamefulTransactions
+        },
+        { withCredentials: true }
+      )
+      .then(resp => {
+        console.log("Plaid transactions added", resp);
       });
   };
 
@@ -90,15 +121,45 @@ class Profile extends Component {
     this.setState({ usersToShow });
   };
 
+  checkTransaction = transactionName => {
+    const isChecked = this.state.checkedPlaidTransactions.includes(
+      transactionName
+    );
+    console.log("i want to die", isChecked);
+    console.log("checked", this.state.checkedPlaidTransactions);
+    console.log("t name", transactionName);
+    let newCheckedTransactions = [];
+    if (!isChecked) {
+      newCheckedTransactions = [
+        ...this.state.checkedPlaidTransactions,
+        transactionName
+      ];
+    } else {
+      newCheckedTransactions = this.state.checkedPlaidTransactions.filter(
+        t => t !== transactionName
+      );
+    }
+
+    console.log("new checked", newCheckedTransactions);
+
+    this.setState({
+      checkedPlaidTransactions: newCheckedTransactions
+    });
+  };
+
   render() {
     return (
       <IonPage>
         <Header />
         <IonContent>
           <IonCard className="welcome-card">
-            <img src="https://i.imgur.com/Pq6GIEY.png" alt="" />
+            <img
+              style={{ objectFit: "cover" }}
+              src="https://i.imgur.com/Pq6GIEY.png"
+              alt=""
+            />
             <IonCardHeader>
-              <IonCardTitle color="tertiary">Welcome to Shamehub</IonCardTitle>
+              <IonCardTitle color="tertiary">Welcome to shamehub</IonCardTitle>
               <ion-card-content color="tertiary">
                 Cut down on bad habits by broadcasting them to be shamed by all
                 of your friends! Connect your credit and debit cards and let the
@@ -143,10 +204,9 @@ class Profile extends Component {
 
           <PlaidLink
             id="plaidlink"
-            clientName="Your app name"
-            env="development"
-            // env="sandbox"
-
+            clientName="shamehub"
+            // env="development"
+            env="sandbox"
             product={["auth", "transactions"]}
             publicKey="b1ede095e08a4bf8d26515ed4fe3b2"
             onExit={() => {
@@ -155,39 +215,46 @@ class Profile extends Component {
             onSuccess={this.onSuccess}
           >
             <IonButton expand="block" color="secondary">
-              Connect Bank Account with Plaid
+              Connect a Bank Account
             </IonButton>
           </PlaidLink>
 
           <IonModal isOpen={this.state.showTransactionsModal}>
-            <IonHeader translucent>
-              <IonTitle>Recent Transactions</IonTitle>
+            <IonHeader>
+              <IonToolbar>
+                <IonTitle>Recent Transactions</IonTitle>
+              </IonToolbar>
             </IonHeader>
 
             <IonContent fullscreen>
+              <IonLabel>
+                <p style={{ padding: "15px" }}>
+                  Which of the following recent transactions would you consider
+                  shameful?
+                </p>
+              </IonLabel>
               <IonList>
-                {this.state.usersToShow.map((user, idx) => {
+                {this.state.plaidTransactions.map((transaction, idx) => {
                   return (
-                    <IonItem onClick={() => this.onFollow(user.id)} key={idx}>
-                      {user.name}
+                    <IonItem
+                      key={idx}
+                      onClick={() => this.checkTransaction(transaction.name)}
+                      style={{ display: "flex" }}
+                    >
+                      <IonCheckbox slot="start" />
+                      <IonLabel>{transaction.name}</IonLabel>
+                      <IonLabel>{`$${transaction.amount}`}</IonLabel>
                     </IonItem>
                   );
                 })}
               </IonList>
             </IonContent>
-            <IonButton onClick={() => this.setState({ showModal: false })}>
-              Done Adding Friends
+            <IonButton onClick={this.processShamefulTransactions}>
+              Done
             </IonButton>
           </IonModal>
 
-          <IonCard className="welcome-card">
-            <IonCardHeader>
-              <IonCardSubtitle>Connected Accounts</IonCardSubtitle>
-            </IonCardHeader>
-            <IonCardContent>
-              <IonList></IonList>
-            </IonCardContent>
-          </IonCard>
+          <ConnectedAccounts />
         </IonContent>
       </IonPage>
     );
