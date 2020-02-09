@@ -21,7 +21,7 @@ import React, { Component } from "react";
 import PlaidLink from "react-plaid-link";
 
 import "./Profile.css";
-import Header from "../components/header";
+import Header from "../components/Header";
 import { API_BASE } from "../constants";
 import axios from "axios";
 

@@ -28,11 +28,12 @@ def hello():
 
 
 @app.route('/login', methods=['POST'])
+@cross_origin()
 def login():
-    email = request.form['email']
+    email = request.json['email']
     id, password = dbcursor.execute(
         "SELECT user_id, password FROM users WHERE email = '{0}'".format(email)).fetchone()
-    if request.form['password'] == password:
+    if request.json['password'] == password:
         resp = make_response('Login Successful')
         resp.set_cookie('x-uid', str(id))
         return resp
@@ -41,15 +42,16 @@ def login():
 
 
 @app.route('/signup', methods=['POST'])
+@cross_origin()
 def sign_up():
-    email = request.form['email']
+    email = request.json['email']
     result = dbcursor.execute(
         "SELECT email FROM users WHERE email = '{0}'".format(email)).fetchone()
     if result:
         abort(400)
     else:
-        password = request.form['password']
-        name = request.form['name']
+        password = request.json['password']
+        name = request.json['name']
         id = dbcursor.execute("INSERT INTO public.users(email, name, password) VALUES('{0}', '{1}', '{2}') RETURNING user_id".format(
             email, name, password)).fetchone()[0]
         dbconn.commit()
@@ -59,6 +61,7 @@ def sign_up():
 
 
 @app.route('/comments', methods=['POST'])
+@cross_origin()
 def add_comment():
     commentor = request.cookies.get('x-uid')
     if not commentor:
@@ -76,8 +79,8 @@ def add_reaction():
     reactor = request.cookies.get('x-uid')
     if not reactor:
         abort(401)
-    reaction = request.form['reaction']
-    transaction = request.form['transaction_id']
+    reaction = request.json['reaction']
+    transaction = request.json['transaction_id']
     dbcursor.execute("INSERT INTO public.reactions(reactor, transaction_id, reaction) VALUES('{0}', '{1}', '{2}') RETURNING reaction".format(
         reactor, transaction, reaction)).fetchone()
     dbconn.commit()
