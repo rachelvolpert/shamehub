@@ -45,8 +45,12 @@ def insights():
 @app.route('/login', methods=['POST'])
 def login():
     email = request.json['email']
-    id, password = dbcursor.execute(
+    db_response = dbcursor.execute(
         "SELECT user_id, password FROM users WHERE email = '{0}'".format(email)).fetchone()
+    if db_response:
+        id, password = db_response
+    else:
+        abort(401)
     if request.json['password'] == password:
         resp = make_response('Login successful!')
         resp.set_cookie('x-uid', str(id))

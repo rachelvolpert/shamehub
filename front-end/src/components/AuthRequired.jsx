@@ -20,12 +20,12 @@ export default class Auth extends Component {
       "$1"
     );
     const isAuthed = !!cookieValue;
-    // TODO lol no
-    this.setState({ isAuthed: true });
+    this.setState({ isAuthed: isAuthed });
   }
   render() {
     const { component } = this.props;
     let { isAuthed } = this.state;
+    console.log("isAuthed", isAuthed);
     if (isAuthed) {
       return component;
     } else {

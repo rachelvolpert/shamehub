@@ -55,9 +55,13 @@ class Profile extends Component {
 
   onFollow = uid => {
     axios
-      .post(`${API_BASE}/follows`, {
-        fid: uid
-      })
+      .post(
+        `${API_BASE}/follows`,
+        {
+          fid: uid
+        },
+        { withCredentials: true }
+      )
       .then(resp => {
         console.log("follow added", resp);
       });

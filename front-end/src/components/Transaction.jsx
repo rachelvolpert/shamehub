@@ -21,7 +21,7 @@ import {
   IonInput
 } from "@ionic/react";
 import axios from "axios";
-import { groupBy } from "lodash";
+import { groupBy, countBy } from "lodash";
 
 import { API_BASE } from "../constants";
 
@@ -33,19 +33,57 @@ const reactionToEmoji = {
 
 export default class Transaction extends Component {
   state = {
-    comment: ""
+    comment: "",
+    comments: [],
+    reactions: {
+      ":sad:": 0,
+      ":andgry:": 0,
+      ":woozy:": 0
+    }
   };
-  sendReaction(reactionName, transactionId) {
-    axios.post(`${API_BASE}/reactions`, {
-      reaction: reactionName,
-      transaction_id: transactionId
+  componentDidMount() {
+    console.log(countBy(this.props.transaction.reactions, r => r.reaction));
+    this.setState({
+      comments: this.props.transaction.comments,
+      reactions: {
+        ...this.state.reactions,
+        ...countBy(this.props.transaction.reactions, r => r.reaction)
+      }
     });
   }
+  sendReaction(reactionName, transactionId) {
+    axios
+      .post(
+        `${API_BASE}/reactions`,
+        {
+          reaction: reactionName,
+          transaction_id: transactionId
+        },
+        { withCredentials: true }
+      )
+      .then(res => {
+        if (res.status === 200) {
+          console.log("Successfully reacted");
+          console.log("state", this.state);
 
-  renderReactions(reactions, transactionId) {
-    const reactionsByType = groupBy(reactions, r => r.reaction);
+          this.setState(
+            {
+              reactions: {
+                ...this.state.reactions,
+                [reactionName]: this.state.reactions[reactionName] + 1
+              }
+            },
+            () => {
+              console.log("state", this.state);
+            }
+          );
+        }
+      });
+  }
+
+  renderReactions(reactionCounts, transactionId) {
     return Object.keys(reactionToEmoji).map((react, idx) => {
-      const numReacts = (reactionsByType[react] || []).length;
+      const numReacts = reactionCounts[react];
       return (
         <IonChip
           onClick={() => this.sendReaction(react, transactionId)}
@@ -68,10 +106,33 @@ export default class Transaction extends Component {
     // Enter = submit comment
     if (e.keyCode === 13 && !!this.state.comment) {
       // time 2 submit comment
-      axios.post(`${API_BASE}/comments`, {
-        comment: this.state.comment,
-        transaction_id: transactionId
-      });
+      axios
+        .post(
+          `${API_BASE}/comments`,
+          {
+            comment: this.state.comment,
+            transaction_id: transactionId
+          },
+          { withCredentials: true }
+        )
+        .then(res => {
+          if (res.status === 200) {
+            console.log("Successfully commented");
+
+            this.setState(
+              {
+                comment: "",
+                comments: [
+                  ...this.state.comments,
+                  { comment_text: this.state.comment, commentor_name: "You" }
+                ]
+              },
+              () => {
+                console.log("state", this.state);
+              }
+            );
+          }
+        });
     }
   };
 
@@ -90,9 +151,9 @@ export default class Transaction extends Component {
         <hr style={{ background: "var(--ion-color-light)" }} />
 
         <IonCardContent>
-          {this.renderReactions(transaction.reactions, transaction.t_id)}
+          {this.renderReactions(this.state.reactions, transaction.t_id)}
 
-          {transaction.comments.map((comment, idx) => {
+          {this.state.comments.map((comment, idx) => {
             return (
               <IonLabel key={idx}>
                 <h3>{comment.commentor_name}</h3>
@@ -102,6 +163,7 @@ export default class Transaction extends Component {
           })}
           <div style={{ display: "flex" }}>
             <IonInput
+              value={this.state.comment}
               style={{ border: "solid 1px var(--ion-color-medium)" }}
               placeholder="Add a new comment..."
               onInput={this.onInputComment}
