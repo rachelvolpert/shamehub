@@ -116,7 +116,11 @@ def get_insights():
 def get_user():
     users = dbcursor.execute(
         "SELECT DISTINCT user_id, name FROM users").fetchall()
-    return users
+    user_list = []
+    for row in users:
+        my_dict = {"id":row[0], "name":row[1]}
+        user_list.append(my_dict)
+    return jsonify(user_list)
 
 
 @app.route("/follows", methods=['POST'])
@@ -124,11 +128,9 @@ def follow():
     user = request.cookies.get('x-uid')
     if not user:
         abort(401)
-    followee = request.form['friend']
-    followee_id = dbcursor.execute(
-        "SELECT user_id FROM users WHERE name = '{0}'".format(followee)).fetchone()[0]
+    followee = request.json['fid']
     dbcursor.execute("INSERT INTO public.followers(follower, followee) VALUES({0}, {1}) RETURNING follower, followee".format(
-        user, followee_id)).fetchone()[0]
+        user, followee)).fetchone()[0]
     dbconn.commit()
     return "Now following {0}".format(followee)
 
