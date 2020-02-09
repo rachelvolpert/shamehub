@@ -61,6 +61,16 @@ class Insights extends Component {
               <ion-card-content color="tertiary"></ion-card-content>
             </IonCardHeader>
           </IonCard>
+          <IonCard className="insights-card">
+            <img src="https://i.imgur.com/Ole8dn3.jpg" alt="" />
+            <IonCardHeader>
+              <IonCardTitle color="tertiary">
+                You could have planted {Math.floor(this.state.total / 2.5)}{" "}
+                trees instead!
+              </IonCardTitle>
+              <ion-card-content color="tertiary"></ion-card-content>
+            </IonCardHeader>
+          </IonCard>
         </IonContent>
       </IonPage>
     );
