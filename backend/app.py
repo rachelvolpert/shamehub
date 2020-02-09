@@ -111,17 +111,21 @@ def add_reaction():
 @app.route("/total_spent")
 def total_spent():
     user = request.cookies.get('x-uid')
-    total = dbcursor.execute("SELECT SUM(amount) FROM transactions WHERE user_id = {0} and date > CURRENT_DATE - interval '30 day' ".format(user)).fetchone()
+    if not user:
+        abort(401)
+    total = dbcursor.execute(
+        "SELECT SUM(amount) FROM transactions WHERE user_id = {0} and date > CURRENT_DATE - interval '30 day' ".format(user)).fetchone()[0]
     print(total)
     if total == None:
         total = 0
-    return {"total":total}
+    return {"total": total}
 
 
 @app.route("/categories_spent")
 def categories_spent():
     user = request.cookies.get('x-uid')
-    spent_list = dbcursor.execute("SELECT category, SUM(amount) as total FROM transactions WHERE user_id = {0} and date > CURRENT_DATE - interval '30 day' GROUP BY 1 ".format(user)).fetchall()
+    spent_list = dbcursor.execute(
+        "SELECT category, SUM(amount) as total FROM transactions WHERE user_id = {0} and date > CURRENT_DATE - interval '30 day' GROUP BY 1 ".format(user)).fetchall()
     total = [{"category": row[0], "total": row[1]} for row in spent_list]
     return jsonify(total)
 
@@ -302,4 +306,3 @@ def pretty_print_response(response):
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 8000))
     app.run(host='0.0.0.0', port=port)
-    

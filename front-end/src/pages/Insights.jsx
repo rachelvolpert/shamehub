@@ -28,16 +28,14 @@ const InsightsPage = () => {
   );
 };
 
-
 class Insights extends Component {
-
   state = {
     total: 0
-  }
+  };
 
-  getTotalSpent() {
+  componentDidMount() {
     axios
-      .get(`${API_BASE}/total_spent`)
+      .get(`${API_BASE}/total_spent`, { withCredentials: true })
       .then(resp => {
         this.setState({
           total: resp.data.total
@@ -53,16 +51,16 @@ class Insights extends Component {
       <IonPage>
         <Header />
         <IonContent>
-        <IonCard className="insights-card">
+          <IonCard className="insights-card">
             <img src="https://i.imgur.com/EWtXf5k.jpg" alt="" />
             <IonCardHeader>
-             <ion-card-subtitle>In the past 30 days...</ion-card-subtitle>
-              <IonCardTitle color="tertiary">You spent {this.state.total} shame dollars</IonCardTitle>
-              <ion-card-content color="tertiary">
-              </ion-card-content>
+              <ion-card-subtitle>In the past 30 days...</ion-card-subtitle>
+              <IonCardTitle color="tertiary">
+                You spent {this.state.total} shame dollars
+              </IonCardTitle>
+              <ion-card-content color="tertiary"></ion-card-content>
             </IonCardHeader>
           </IonCard>
-
         </IonContent>
       </IonPage>
     );
