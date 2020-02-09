@@ -13,7 +13,7 @@ export default class Auth extends Component {
   state = {
     isAuthed: false
   };
-  componentDidMount() {
+  componentWillMount() {
     console.log("document cookie", document.cookie);
     const cookieValue = document.cookie.replace(
       /(?:(?:^|.*;\s*)x-uid\s*\=\s*([^;]*).*$)|^.*$/,
@@ -24,8 +24,11 @@ export default class Auth extends Component {
   }
   render() {
     const { component } = this.props;
-    const { isAuthed } = this.state;
-    console.log("isauthed", isAuthed);
-    return isAuthed ? component : <Redirect to="/auth" />;
+    let { isAuthed } = this.state;
+    if (isAuthed) {
+      return component;
+    } else {
+      return <Redirect to="/auth" />;
+    }
   }
 }
