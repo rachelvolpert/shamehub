@@ -7,6 +7,8 @@
     "@ionic/react": "^4.11.8",
     "@ionic/react-router": "^4.11.8",
     "@sentry/browser": "^5.12.1",
+    "@capacitor/android": "^1.5.0",
+    "@capacitor/core": "1.5.0",
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.4.0",
     "@testing-library/user-event": "^8.0.3",
@@ -49,6 +51,8 @@
   },
   "description": "An Ionic project",
   "devDependencies": {
+    "@capacitor/cli": "^1.5.0",
+    "@ionic/cli": "^6.0.1",
     "eslint": "^6.8.0",
     "eslint-plugin-react": "^7.18.3",
     "react-scripts": "3.3.0"
