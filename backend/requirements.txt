@@ -6,7 +6,7 @@ chardet==3.0.4
 Click==7.0
 idna==2.8
 itsdangerous==1.1.0
-Jinja2==2.11.1
+Jinja2==2.11.3
 MarkupSafe==1.1.1
 plaid-python==3.5.0
 requests==2.22.0
