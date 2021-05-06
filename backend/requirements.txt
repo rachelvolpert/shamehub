@@ -12,7 +12,7 @@ plaid-python==3.5.0
 requests==2.22.0
 urllib3==1.25.8
 Werkzeug==1.0.0
-Flask-Cors==3.0.8
+Flask-Cors==3.0.9
 six==1.14.0
 sentry-sdk==0.14.1
 blinker==1.4
